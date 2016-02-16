@@ -1,0 +1,7 @@
+python construct_citation_table.py ICML
+python construct_citation_table.py ICWSM
+python construct_citation_table.py WSDM
+python construct_citation_table.py NIPS
+python construct_citation_table.py CVPR
+python construct_citation_table.py PLDI
+python construct_citation_table.py IJCAI
