@@ -1,5 +1,10 @@
 
-workflow for a new conference 
+
+This repo contains the scripts to process Microsoft Academic Graph, 
+in order to profile the citation influence and reference heritage of a publication venue (e.g. conferences). 
+
+
+### developer workflow to analyze a new conference /venue
 
 0) prep Paper.db (once and for all)
 first run prune_papers.ipynb
