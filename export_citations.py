@@ -20,7 +20,7 @@ conf_df = pd.read_table(conf_file, header=None, names=['ConfID', 'Abbrv', 'FullN
 c = sys.argv[1]
 output_dir = os.path.join(data_dir, 'out', c)
 if not os.path.exists(output_dir):
-    os.mkdir(output_dir)
+    os.makedirs(output_dir)
 
 row = conf_df.loc[conf_df['Abbrv'] == c]
 conf_id = list(row['ConfID'])[0]
@@ -33,7 +33,7 @@ if not os.path.exists(conf_paper_file):
     paper_file = os.path.join(data_dir, 'data_txt', 'Papers.txt')
     cmd = "grep " + conf_id +' '+ paper_file + ' > ' + conf_paper_file
     print("{} {}".format(datetime.now(), cmd) )
-    subprocess.call(cmd)
+    os.system(cmd)
 
 df_paper = pd.read_table(conf_paper_file, header=None, 
                          names=['PaperID', 'TitleOrig', 'TitleNorm', 'PubYear', 'PubDate', 
