@@ -18,10 +18,14 @@ conf_file = os.path.join(data_dir, 'data_txt', 'ConferenceSeries.txt')
 conf_df = pd.read_table(conf_file, header=None, names=['ConfID', 'Abbrv', 'FullName'])
 
 c = sys.argv[1]
+output_dir = os.path.join(data_dir, 'out', c)
+if not os.path.exists(output_dir):
+    os.mkdir(output_dir)
+
 row = conf_df.loc[conf_df['Abbrv'] == c]
 conf_id = list(row['ConfID'])[0]
 #conf_id = '43AA5802' # "43AA5802	MM	ACM Multimedia"
-conf_paper_file = os.path.join(data_dir, 'papers.'+ c +'.txt')
+conf_paper_file = os.path.join(output_dir, 'papers.'+ c +'.txt')
 print( conf_id)
 print(conf_paper_file)
 
@@ -68,11 +72,11 @@ while ptr < len(paper_ref_buf):
 
 print('{} {:9.0f} lines, found {:6.0f} citing, {:6.0f} cited'.format(datetime.now(), line_cnt, citing_cnt, cited_cnt) )
 
-citing_file = os.path.join(data_dir, 'citing.'+c+'.txt')
+citing_file = os.path.join(output_dir, 'citing.'+c+'.txt')
 with open(citing_file, 'wt') as fh:
     fh.write('\n'.join(['\t'.join(s) for s in citing_records] ))
 
-cited_file = os.path.join(data_dir, 'cited.'+c+'.txt')
+cited_file = os.path.join(output_dir, 'cited.'+c+'.txt')
 with open(cited_file, 'wt') as fh:
     fh.write('\n'.join(['\t'.join(s) for s in cited_records] ))
 
