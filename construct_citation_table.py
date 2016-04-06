@@ -31,17 +31,18 @@ c = sys.argv[1] #conf_list[0]
 row = conf_df.loc[conf_df['Abbrv'] == c]
 conf_id = list(row['ConfID'])[0]
 
+output_dir = os.path.join(data_dir, 'out', c)
 
-conf_paper_file = os.path.join(data_dir, 'papers.'+ c +'.txt')
+conf_paper_file = os.path.join(output_dir, 'papers.'+ c +'.txt')
 df_paper = pd.read_table(conf_paper_file, header=None, 
                          names=['PaperID', 'TitleOrig', 'TitleNorm', 'PubYear', 'PubDate', 
                                'DOI', 'VenueOrig', 'VenueNorm', 'JournalID', 'ConfID', 'PaperRank' ])
 df_paper.head()
 set_paper = set(df_paper['PaperID'])
 
-citing_file = os.path.join(data_dir, 'citing.'+c+'.txt')
+citing_file = os.path.join(output_dir, 'citing.'+c+'.txt')
 df_citing = load_ref(citing_file)
-cited_file = os.path.join(data_dir, 'cited.'+c+'.txt')
+cited_file = os.path.join(output_dir, 'cited.'+c+'.txt')
 df_cited = load_ref(cited_file)
 print ("{} conference {}: {} papers ({}-{})".format(datetime.now(), c, df_paper['PaperID'].count(), 
                                                df_paper['PubYear'].min(), df_paper['PubYear'].max()))
@@ -99,6 +100,6 @@ print('{} {:6.0f} / {:6.0f} records. Done.\n\n'.format(
                 datetime.now(), cnt, dfx_cited['PaperID'].count() ) )   
 
 pickle.dump({"name":c, 'citing':dfx_citing, "cited":dfx_cited, "paper":df_paper}, 
-           open(os.path.join(data_dir, 'cite_records.'+c+".pkl"), 'wb') ) 
+           open(os.path.join(output_dir, 'cite_records.'+c+".pkl"), 'wb') ) 
 
-print("saved to " + os.path.join(data_dir, 'cite_records.'+c+".pkl"))
+print("saved to " + os.path.join(output_dir, 'cite_records.'+c+".pkl"))
