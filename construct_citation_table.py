@@ -87,8 +87,10 @@ cnt = 0
 for idx, row in dfx_cited.iterrows():
     cur.execute('SELECT * FROM paper_pruned WHERE id=?', (row['PaperID'], ) )
     s = cur.fetchone() 
-    dfx_cited['PaperPubYear'][idx] = s[1]
-    dfx_cited['PaperVenueID'][idx] = s[2]
+    #dfx_cited['PaperPubYear'][idx] = s[1]
+    #dfx_cited['PaperVenueID'][idx] = s[2]
+    dfx_cited.loc[:,('PaperPubYear', idx)] = s[2]
+    dfx_cited.loc[:,('PaperVenueID', idx)] = s[2]
     cnt += 1
     if cnt % 1000 == 0 : # 2000000
         print('{} {:6.0f} / {:6.0f} records'.format(
