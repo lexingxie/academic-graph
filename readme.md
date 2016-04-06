@@ -6,14 +6,17 @@ in order to profile the citation influence and reference heritage of a publicati
 
 ### developer workflow to analyze a new conference /venue
 
-0) prep Paper.db (once and for all)
+0) prep Paper.db (once for each new version of MAG data)
 first run prune_papers.ipynb
 then import the result to sqlite 
+
 sqlite> create table paper_pruned(id text, year integer, venueid string);                │xlx@braun:~/d2/MicrosoftAcademicGraph$ 
 sqlite> .separator ","                                                                   │xlx@braun:~/d2/MicrosoftAcademicGraph$ 
 sqlite> .import ./data_txt/Papers_pruned.txt paper_pruned  
 
-note: 75M+ papers with unknown venues among 125M in all   
+note: 
+75M+ papers with unknown venues among 120M in all   (jan 2016)
+73M+ papers with unknown venues among 126M in all   (jan 2016)
 
 1) get subset for its published papers:
 
