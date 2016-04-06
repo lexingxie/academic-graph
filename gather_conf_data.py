@@ -5,8 +5,8 @@ import subprocess
 conf_list = ['PLDI', 'WSDM']
 
 for c in conf_list:
-    cmd = "python export_citations.py " + c
-    subprocess.call(cmd)
+    cmd = "./export_citations.py " + c
+    subprocess.call(cmd, shell=True)
 
-    cmd2 = "python construct_citation_table.py " + c
-    subprocess.call(cmd2)
+    cmd2 = "./construct_citation_table.py " + c
+    subprocess.call(cmd2, shell=True)
