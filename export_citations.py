@@ -14,7 +14,7 @@ with open(paper_ref_file, 'rt') as fh:
     paper_ref_buf = fh.read()
 print( '{} load ref db {} bytes'.format(datetime.now(), sys.getsizeof(paper_ref_buf)) ) 
 
-conf_file = os.path.join(data_dir, 'data_txt', 'ConferenceSeries.txt')
+conf_file = os.path.join(data_dir, 'data_txt', 'Conferences.txt')
 conf_df = pd.read_table(conf_file, header=None, names=['ConfID', 'Abbrv', 'FullName'])
 
 c = sys.argv[1]

@@ -17,7 +17,7 @@ cur = conn.cursor()
 
 load_ref = lambda fn: pd.read_table(fn, header=None, names=['PaperID', 'RefID'])
 
-conf_file = os.path.join(data_dir, 'data_txt', 'ConferenceSeries.txt')
+conf_file = os.path.join(data_dir, 'data_txt', 'Conferences.txt')
 conf_df = pd.read_table(conf_file, header=None, names=['ConfID', 'Abbrv', 'FullName'])
 
 
