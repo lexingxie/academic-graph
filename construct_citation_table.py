@@ -8,7 +8,6 @@ import warnings
 
 #data_dir = '/Users/xlx/Downloads/graph-data'
 data_dir = '/home/xlx/d2/MicrosoftAcademicGraph'
-conf_list = ['MM', 'CVPR', 'NIPS', 'ICML', 'IJCAI', 'PLDI']
 
 paper_db = os.path.join(data_dir, 'Paper.db')
 
@@ -70,8 +69,8 @@ for idx, row in dfx_citing.iterrows():
     s = cur.fetchone() 
     #dfx_citing['RefPubYear'][idx] = s[1]
     #dfx_citing['RefVenueID'][idx] = s[2]
-    dfx_citing.loc['RefPubYear', idx] = s[1]
-    dfx_citing.loc['RefVenueID', idx] = s[2]
+    dfx_citing.loc[idx,'RefPubYear'] = s[1]
+    dfx_citing.loc[idx,'RefVenueID'] = s[2]
     cnt += 1
     if cnt % 1000 == 0 : # 2000000
         print('{} {:6.0f} / {:6.0f} records'.format(
@@ -91,8 +90,8 @@ for idx, row in dfx_cited.iterrows():
     s = cur.fetchone() 
     #dfx_cited['PaperPubYear'][idx] = s[1]
     #dfx_cited['PaperVenueID'][idx] = s[2]
-    dfx_cited.loc['PaperPubYear', idx] = s[1]
-    dfx_cited.loc['PaperVenueID', idx] = s[2]
+    dfx_cited.loc[idx,'PaperPubYear'] = s[1]
+    dfx_cited.loc[idx,'PaperVenueID'] = s[2]
 
     cnt += 1
     if cnt % 1000 == 0 : # 2000000
