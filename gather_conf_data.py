@@ -2,7 +2,7 @@
 import os, sys
 import subprocess
 
-conf_list = ['PLDI', 'WSDM']
+conf_list = sys.argv[1].strip().split(',') #['PLDI', 'WSDM']
 
 for c in conf_list:
     cmd = "python export_citations.py " + c
