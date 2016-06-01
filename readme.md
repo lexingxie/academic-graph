@@ -18,7 +18,8 @@ then import the result to sqlite
 	sqlite> .import ./data_txt/Papers_pruned.txt paper_pruned  
 
 or 
-sqlite3 Papers.db < paperdb.sql
+
+	sqlite3 Papers.db < paperdb.sql
 
 note: 
 75M+ papers with unknown venues among 120M in all   (jan 2016)
