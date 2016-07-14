@@ -219,15 +219,15 @@ for conf in conf_list:
     ax5 = plt.subplot(1, 2, 1)
     sns.set_style("whitegrid")
 
-citations_not_null = [0]*len(paper_years) 
-citations_num_null = [0]*len(paper_years) 
-for name, gf in df_cited.groupby(['RefPubYear']):
-    #print(gf.head())
-    # print(name, len(gf), len ( gf['PaperVenueID'][gf['PaperVenueID'] != ''] ), len ( gf['PaperVenueID'][gf['PaperVenueID'] == ''] )) 
-    if name in paper_years:    
-        idx = list(paper_years).index(name)
-        citations_not_null[idx] = len ( gf['PaperVenueID'][gf['PaperVenueID'] != ''] ) 
-        citations_num_null[idx] = len ( gf['PaperVenueID'][gf['PaperVenueID'] == ''] )
+    citations_not_null = [0]*len(paper_years) 
+    citations_num_null = [0]*len(paper_years) 
+    for name, gf in df_cited.groupby(['RefPubYear']):
+        #print(gf.head())
+        # print(name, len(gf), len ( gf['PaperVenueID'][gf['PaperVenueID'] != ''] ), len ( gf['PaperVenueID'][gf['PaperVenueID'] == ''] )) 
+        if name in paper_years:    
+            idx = list(paper_years).index(name)
+            citations_not_null[idx] = len ( gf['PaperVenueID'][gf['PaperVenueID'] != ''] ) 
+            citations_num_null[idx] = len ( gf['PaperVenueID'][gf['PaperVenueID'] == ''] )
     
     print(citations_not_null, citations_num_null)
     print(len(citations_not_null), len(citations_num_null))
@@ -238,8 +238,7 @@ for name, gf in df_cited.groupby(['RefPubYear']):
 
     tk5 = plt.xticks(x_pos, paper_years, rotation=60) 
     ax5.set_ylabel('num-citations-per-year')
-    plt.legend((rects5a[0], rects5b[0]), 
-               ('from known venues', 'from unknown venue'), bbox_to_anchor=(.45, 1))
+    plt.legend((rects5a[0], rects5b[0]), ('from known venues', 'from unknown venue'), bbox_to_anchor=(.45, 1))
 
     ax6 = plt.subplot(1, 2, 2)
     sns.set_style("whitegrid")
@@ -639,11 +638,19 @@ for name, gf in df_cited.groupby(['RefPubYear']):
     ph.write('tags:\n  - "citation"\n  - "datasci"\n  - "graph"\n')
     ph.write("---\n\n")
 
+    """ overview image and its legend
+    <div style="float:left; position: relative; width:320px; height:200px">
+      <a href=#fig4><img src="/img/citation/ICAPS/ICAPS_mini_graph.png" style="position: relative; top: 0; left: 0;" width="320"/></a>
+      <img src="/img/citation/mini_bar.png" style="position: absolute; top: 160px; left: 30px;"/>
+    </div>
+    """
+    ph.write('<div style="float:left; position: relative; width:320px; height:200px">')
+    ph.write('  <a href=#fig4><img style="float:left;" src="{}" '.format(os.path.join(img_path, conf, conf+'_mini_graph.png')))
+    ph.write('width="320" style="position: relative; top: 0; left: 0;" alt="{}: summary of top {} venues"></a>\n'.format(conf, len(venue_topK)))
+    ph.write('  <img src="/img/citation/mini_bar.png" style="position: absolute; top: 160px; left: 30px;"/>\n')
+    ph.write('</div>\n')
     """ write basic stats
     """
-
-    ph.write('<img style="float:left;" src="{}" '.format(os.path.join(img_path, conf, conf+'_mini_graph.png')))
-    ph.write('height="160" hspace="15" vspace="10" alt="{}: summary of top {} venues">\n'.format(conf, len(venue_topK)))
     ph.write('### Overall stats:\n\n')
     ph.write('* {} years of publication {}--{}, {} papers total\n'.format(len(paper_years), paper_years[0], paper_years[-1], len(df_paper)))
     ph.write('* {} references total, average {} per paper\n'.format(len(df_citing), round(1.*len(df_citing)/len(df_paper), 2)) )
