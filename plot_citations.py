@@ -680,7 +680,7 @@ for conf in conf_list:
             info = ""
 
         img_fn = os.path.join(img_path, conf, conf+'_'+fn+'.png')
-        ph.write('<a href={}><img width={} src="{}"></a>\n'.format(img_fn, img_width, img_fn))
+        ph.write('<a id=fig{} href={}><img width={} src="{}"></a>\n'.format(i+1, img_fn, img_width, img_fn))
         if fn == 'graph':
             ph.write('<img align=center width={} src="{}">\n\n'.format(int(0.75*img_width), os.path.join(img_path, 'color_bar.png')))
 
