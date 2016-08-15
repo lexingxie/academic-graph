@@ -28,7 +28,7 @@ for conf in conf_list:
     
     d = pickle.load( open(os.path.join(data_dir, 'cite_records.'+conf+".pkl"), 'rb') )
     # pickle.dump({"name":c, 'citing':dfx_citing, "cited":dfx_cited, "paper":df_paper}, 
-    #           open(os.path.join(data_dir, 'cite_records.'+c+".pkl"), 'wb') ) 
+    #           open(os.path.join(data_dir, 'cite_records.'+c+".pkl"), 'wb') )
 
     df_citing = d['citing']
     df_cited = d['cited']
@@ -306,27 +306,88 @@ for conf in conf_list:
     ### citation year heatmap
     print('{} paper papers from {} to {}, cited {} time, avg {:0.2f} cites per paper'.format(
             len(df_paper), df_paper['PubYear'].min(), df_paper['PubYear'].max(), len(df_cited), len(df_cited)/len(df_paper)))
+
     grouped_cited = df_cited.groupby(['RefPubYear'], sort=True)
     #print( grouped_cited.count() )
     #len(grouped_cited)
 
-    cite_pubyear_count = pd.DataFrame(data=None, index=np.unique(df_cited['PaperPubYear'] ), 
-                                        columns=paper_years, dtype='int32')
+    cite_pubyear_count = pd.DataFrame(data=0, index=np.unique(df_cited['PaperPubYear'] ), 
+                                        columns=paper_years, dtype='int')
+    cite_paper_count = pd.DataFrame(data=0, index=np.unique(df_cited['PaperPubYear'] ), 
+                                        columns=paper_years, dtype='int')
+    cite_fraction_count = pd.DataFrame(data=np.nan, index=np.unique(df_cited['PaperPubYear'] ), 
+                                        columns=paper_years, dtype='float')
+
+    cite_yearange = np.arange(1975,2016)
+
     for name, gf in grouped_cited:
         if name in paper_years:    
             cite_pubyear_count[name] = gf['PaperPubYear'].value_counts(sort=True)
-        #print("{}: {} citations across {} years".format(name, len(gf), len(gf['PaperPubYear'].value_counts())) )
+            group2 = gf.groupby(['PaperPubYear'], sort=True)
+            for py, gf2 in group2:
+                if py in cite_yearange:
+                    cite_paper_count[name][py] = len(np.unique(gf2['RefID'])) # unique number of RefID, or papers being cited
+                    if paper_count[name] > 0:
+                        cite_fraction_count[name][py] = 1.*cite_paper_count[name][py]/paper_count[name] # fraction papers cited
 
-    plt.figure(figsize=(16, 10))
+    ## number of papers cited heatmap
+    plt.figure(figsize=(24, 10))
     sns.set_context("poster", font_scale=0.6) #rc={"lines.linewidth": 2.5}
 
-    ax = sns.heatmap(cite_pubyear_count.loc[1975:2016], linewidths=.5, annot=True, fmt=".0f")
+    ax = sns.heatmap(cite_paper_count.loc[1975:2016], linewidths=.5, annot=True, fmt=".0f")
     sns.axlabel(conf + ' paper-published-year', 'citation-published-year')
     ax.xaxis.tick_top()
     ax.invert_yaxis()
 
     plt.savefig(os.path.join(plot_dir, conf, conf+'_year_citation.png'), transparent=True)
 
+    ## fraction of papers cited heatmap
+    plt.figure(figsize=(22, 10))
+    sns.set_context("poster", font_scale=0.6) #rc={"lines.linewidth": 2.5}
+
+    ax = sns.heatmap(cite_fraction_count.loc[1975:2016], linewidths=.5, annot=True, fmt=".2f")
+
+    sns.axlabel(conf + ' paper-published-year', 'citation-published-year')
+    ax.xaxis.tick_top()
+    ax.invert_yaxis()
+    #plt.title('fraction of papers cited by pub+citation years', loc="bottom")
+
+    plt.savefig(os.path.join(plot_dir, conf, conf+'_year_frac.png'), transparent=True)
+
+
+    # try to produce the 'citation survival rate' figure 
+    max_gap = 21
+    num_cited = [0.]*max_gap
+    num_paper_norm = [0]*max_gap # num of papers published that could have the designated gap
+
+    for pub_year, gf in grouped_cited: #grouped by ref pub_year
+        if pub_year in paper_years: 
+            for gap in range(min(max_gap, max(paper_years)- pub_year)) :
+                from_year = pub_year + gap
+                #cur_cnt = cite_paper_count[pub_year].loc[from_year:].sum() # this is wrong
+                cur_cnt = len( gf[gf['PaperPubYear']>=from_year]['RefID'].unique() )
+                num_cited[gap] += cur_cnt
+                if cur_cnt>0:
+                    num_paper_norm[gap] += paper_count[pub_year]
+                # code from Jacob
+                #num_cited[gap] += len(df[(df['to_year']==to_year) & (df['from_year']>from_year)]['to'].unique())
+                #num_papers[gap] += papers_per_year[to_year]
+
+    df_survive = pd.DataFrame({'gap':range(max_gap),'num_papers':num_paper_norm,'num_cited':num_cited})
+    df_survive['cite_rate'] = df_survive['num_cited']/df_survive['num_papers']
+
+    plt.figure(figsize=(12, 6))
+    ax = sns.lmplot(x='gap', y='cite_rate', data=df_survive, 
+                    line_kws={'c':'0.5', 'lw':1, 'ls':'solid'}, scatter_kws={'c':bar_colrs2[mdx]})
+    ax.set_ylabels('citation survival rate')
+    ax.set_xlabels('years since publication');
+    yrstr = "({}-{})".format(paper_years[0], paper_years[-1])
+    plt.title(conf + yrstr + ' fraction of papers cited > X years')
+    plt.gca().set_ylim(0., 1.)
+
+    plt.savefig(os.path.join(plot_dir, conf, conf+'_citation_survival.png'), transparent=True)
+
+    df_survive
 
     ### code to break down by ref/citation venues
 
@@ -630,6 +691,7 @@ for conf in conf_list:
     ---
     """
     page_title = "{} - {} ({}-{})".format(conf, conf_full_name, paper_years[0], paper_years[-1])
+
     ph.write("---\n")
     ph.write('title: "{}"\n'.format(page_title))
     ph.write('description: "Citation pattern stats and plots for this conference."\n'.format(conf, conf_full_name))
@@ -651,7 +713,8 @@ for conf in conf_list:
     ph.write('</div>\n')
     """ write basic stats
     """
-    ph.write('### Overall stats:\n\n')
+
+    ph.write('### Stats:\n\n')
     ph.write('* {} years of publication {}--{}, {} papers total\n'.format(len(paper_years), paper_years[0], paper_years[-1], len(df_paper)))
     ph.write('* {} references total, average {} per paper\n'.format(len(df_citing), round(1.*len(df_citing)/len(df_paper), 2)) )
     ph.write('\t* {} reference venues, {}% in top {} \n'.format(len(venue_ref_cnt), 
@@ -669,7 +732,8 @@ for conf in conf_list:
     ph.write("### Plots of citation data\n")
     # a list of figures in their order of appearance 
     fig_key = ['cnt_paper', 'cnt_ref', 'cnt_citation', 'graph', 
-               'venue_bar', 'venue_ref', 'venue_citation', 'box_ref', 'year_ref']
+               'venue_bar', 'venue_ref', 'venue_citation', 'box_ref', 'year_ref', 
+               'citation_survival', 'year_citation', 'year_frac'] #, 'year_citation']
     fig_info = json.load(open(os.path.join(plot_dir, 'fig_text.json'), 'rt'))
 
     for i in range(len(fig_key)):
@@ -678,12 +742,15 @@ for conf in conf_list:
             info = fig_info[fn]
         else:
             info = ""
-
+        
         img_fn = os.path.join(img_path, conf, conf+'_'+fn+'.png')
-        ph.write('<a id=fig{} href={}><img width={} src="{}"></a>\n'.format(i+1, img_fn, img_width, img_fn))
+        if fn == 'citation_survival':
+            ph.write('<a id=fig{} href={}><img src="{}"></a><br />\n'.format(i+1, img_fn, img_fn))
+        else:
+            ph.write('<a id=fig{} href={}><img width={} src="{}"></a>\n'.format(i+1, img_fn, img_width, img_fn))
         if fn == 'graph':
             ph.write('<img align=center width={} src="{}">\n\n'.format(int(0.75*img_width), os.path.join(img_path, 'color_bar.png')))
-
+        
         ph.write('Fig {}. {}\n'.format(i+1, info) )
         ph.write('\n')
 
@@ -697,12 +764,13 @@ for conf in conf_list:
     overview_info = json.load(open(overview_file, 'rt'))
 
     img_fn = os.path.join(img_path, conf, conf+'_mini_graph.png')
-    s = '{}\n <img align=center width={} src="{}">\n'.format(page_title, 250, img_fn)
+    s = '{} \n <img align=center width={} src="{}">\n'.format(page_title, 250, img_fn)
     s = '<a href={}>\n\t'.format('/citation/'+conf) + s
     s += '<a>\n'
-    s = '<td width=33%>\n' + s
+    s = '<td>\n' + s
     s += '</td>\n'
     overview_info[conf] = s
+    print(s)
 
     json.dump(overview_info, open(overview_file, 'wt'), sort_keys=True, indent=4)
 
