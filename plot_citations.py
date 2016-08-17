@@ -264,7 +264,7 @@ for conf in conf_list:
     grouped_citing.count()
     len(grouped_citing)
 
-    refpubyear_count = pd.DataFrame(data=None, index=np.unique(df_citing['RefPubYear'] ), 
+    refpubyear_count = pd.DataFrame(data=0, index=np.unique(df_citing['RefPubYear'] ), 
                                         columns=paper_years, dtype='int32')
     for name, gf in grouped_citing:
         if name in paper_years:    
@@ -367,8 +367,8 @@ for conf in conf_list:
                 #cur_cnt = cite_paper_count[pub_year].loc[from_year:].sum() # this is wrong
                 cur_cnt = len( gf[gf['PaperPubYear']>=from_year]['RefID'].unique() )
                 num_cited[gap] += cur_cnt
-                if cur_cnt>0:
-                    num_paper_norm[gap] += paper_count[pub_year]
+                #if cur_cnt>0:
+                num_paper_norm[gap] += paper_count[pub_year]
                 # code from Jacob
                 #num_cited[gap] += len(df[(df['to_year']==to_year) & (df['from_year']>from_year)]['to'].unique())
                 #num_papers[gap] += papers_per_year[to_year]
@@ -384,6 +384,7 @@ for conf in conf_list:
     yrstr = "({}-{})".format(paper_years[0], paper_years[-1])
     plt.title(conf + yrstr + ' fraction of papers cited > X years')
     plt.gca().set_ylim(0., 1.)
+    plt.gca().set_xlim(-1, max_gap+4)
 
     plt.savefig(os.path.join(plot_dir, conf, conf+'_citation_survival.png'), transparent=True)
 
@@ -618,7 +619,7 @@ for conf in conf_list:
     plt.savefig(os.path.join(plot_dir, conf, conf+'_venue_bar.png'), dpi=cur_dpi, transparent=True)
 
     # accumulate counts for refrences
-    refvenue_count = pd.DataFrame(data=None, dtype='int32', index = allvenue_ref, columns = paper_years)
+    refvenue_count = pd.DataFrame(data=0, dtype='int32', index = allvenue_ref, columns = paper_years)
 
     for name, gf in grouped_citing:
         if name in paper_years:    
@@ -626,7 +627,7 @@ for conf in conf_list:
 
 
     # accumulate counts for citations
-    citevenue_count = pd.DataFrame(data=None, index = allvenue_citation, columns = paper_years, dtype='int32')
+    citevenue_count = pd.DataFrame(data=0, index = allvenue_citation, columns = paper_years, dtype='int32')
     for name, gf in grouped_cited:
         if name in paper_years:    
             citevenue_count[name] = gf['PaperVenueID'].value_counts(sort=True)
@@ -706,11 +707,15 @@ for conf in conf_list:
       <img src="/img/citation/mini_bar.png" style="position: absolute; top: 160px; left: 30px;"/>
     </div>
     """
-    ph.write('<div style="float:left; position: relative; width:320px; height:200px">')
-    ph.write('  <a href=#fig4><img style="float:left;" src="{}" '.format(os.path.join(img_path, conf, conf+'_mini_graph.png')))
-    ph.write('width="320" style="position: relative; top: 0; left: 0;" alt="{}: summary of top {} venues"></a>\n'.format(conf, len(venue_topK)))
-    ph.write('  <img src="/img/citation/mini_bar.png" style="position: absolute; top: 160px; left: 30px;"/>\n')
+    ph.write('<div style="float:left; position: relative; width:800px; height:280px">')
+    ph.write('  <a href=#fig4><img style="float:left;" src="{}" '.format(os.path.join(img_path, conf, conf+'_graph.png')))
+    ph.write('width="480" style="position: relative; top: 0; left: 0;" alt="{}: summary of top {} venues"></a>\n'.format(conf, len(venue_topK)))
+    ph.write('  <img src="/img/citation/mini_bar.png" style="position: absolute; top: 220px; left: 90px;"/>\n')
+
+    ph.write('  <a href=#fig10><img style="float:left;" src="{}" '.format(os.path.join(img_path, conf, conf+'_citation_survival.png')))
+    ph.write('width="280" style="position: relative; top: 0; left: 0;"></a>\n')
     ph.write('</div>\n')
+
     """ write basic stats
     """
 
@@ -722,6 +727,8 @@ for conf in conf_list:
     ph.write('* {} citations total, average {} per paper\n'.format(len(df_cited), round(1.*len(df_cited)/len(df_paper), 2) ))
     ph.write('\t* {} citations venues, {}% in top {} \n'.format(len(venue_citation_cnt), 
                                                                np.round(100*venue_citation_cnt[:topK].sum()/venue_citation_cnt.sum()), topK))
+    ph.write("\t* citation survival rates: 0yr {:.2f}; 10yr {:.2f}; 20yr {:.2f} \n".format(
+            df_survive['cite_rate'][0], df_survive['cite_rate'][10], df_survive['cite_rate'][20]))
     ph.write(" \n\n")
 
     fig_summ = open(os.path.join(plot_dir, 'fig_summary.md'), 'rt').read()
@@ -729,7 +736,7 @@ for conf in conf_list:
 
     """ write figures 
     """
-    ph.write("### Plots of citation data\n")
+    #ph.write("### Plots of citation data\n")
     # a list of figures in their order of appearance 
     fig_key = ['cnt_paper', 'cnt_ref', 'cnt_citation', 'graph', 
                'venue_bar', 'venue_ref', 'venue_citation', 'box_ref', 'year_ref', 
